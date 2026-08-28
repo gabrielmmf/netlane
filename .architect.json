@@ -23,12 +23,14 @@
   "stagesApplied": [
     "I",
     "A",
-    "B"
+    "B",
+    "J"
   ],
   "stageVersions": {
     "I": "0.8.0",
     "A": "0.8.0",
-    "B": "0.8.0"
+    "B": "0.8.0",
+    "J": "0.8.0"
   },
   "stagesDeclined": [
     "G"
@@ -54,5 +56,23 @@
   },
   "context": {
     "budgetTokens": 9000
+  },
+  "tiers": {
+    "2": {
+      "paths": [
+        "src/**"
+      ],
+      "minFilesChanged": 3
+    },
+    "3": {
+      "paths": [
+        "src/NetLane.Windows/**",
+        "src/NetLane.Service/**",
+        "scripts/field-tests/**",
+        ".github/workflows/**",
+        "docs/constituicao.md",
+        "scripts/verify.ps1"
+      ]
+    }
   }
 }
