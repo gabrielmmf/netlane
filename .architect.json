@@ -11,7 +11,8 @@
     "language": "pt-BR",
     "branchingModel": "trunk-com-um-pr-por-fatia",
     "remoteVisibility": "public",
-    "fieldTestIsolation": "snapshot-restore-no-host"
+    "fieldTestIsolation": "snapshot-restore-no-host",
+    "versioning": "minver-tag-driven"
   },
   "customStages": {
     "P": {
@@ -28,7 +29,8 @@
     "C",
     "K",
     "F",
-    "H"
+    "H",
+    "E"
   ],
   "stageVersions": {
     "I": "0.8.0",
@@ -38,7 +40,8 @@
     "C": "0.8.0",
     "K": "0.8.0",
     "F": "0.8.0",
-    "H": "0.8.0"
+    "H": "0.8.0",
+    "E": "0.8.0"
   },
   "stagesDeclined": [
     "G"

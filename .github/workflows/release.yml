@@ -1,0 +1,94 @@
+# Release: dispara na tag, não no merge.
+#
+# A ordem aqui é o inverso do padrão do plugin, de propósito. No padrão, o
+# workflow calcula a versão e empurra o commit e a tag — e o modo de falha
+# clássico é o push do commit de versão ser recusado pela ruleset da main,
+# deixando uma versão implantada sem tag e sem changelog.
+#
+# Com MinVer a tag é a ENTRADA, não a saída: você marca, o workflow constrói o
+# que a tag descreve. Não existe push de volta para a main, então esse modo de
+# falha inteiro deixa de existir. O custo é que marcar a tag é um ato humano —
+# o que, num produto com um mantenedor, é onde a decisão já estava mesmo.
+#
+#   git tag v0.1.0 && git push origin v0.1.0
+
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+# Nunca cancelar um release em andamento: enfileirar. Release cancelado no meio
+# é um sistema meio publicado. (No PR é o contrário — lá se cancela.)
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  # A MESMA régua que o PR passou. Não uma equivalente: o mesmo arquivo.
+  qualidade:
+    uses: ./.github/workflows/quality.yml
+
+  publicar:
+    needs: qualidade
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # MinVer deriva a versão das tags. Sem o histórico completo e sem as
+          # tags, todo build sai como 0.0.0-alpha.0 e a versão vira decoração.
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Publicar os binários
+        shell: pwsh
+        run: |
+          dotnet publish NetLane.sln -c Release -r win-x64 --self-contained false -o artefatos
+          Get-ChildItem artefatos | Format-Table Name, Length
+
+      - name: Conferir que a versão do binário bate com a tag
+        shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          # Sem isto, "qual versão está instalada?" só tem resposta por
+          # investigação — e é a pergunta que se faz durante um incidente.
+          $esperada = $env:TAG -replace '^v', ''
+          $exe = Get-ChildItem artefatos -Filter '*.exe' | Select-Object -First 1
+          if (-not $exe) {
+            Write-Host '::warning::Nenhum executável publicado ainda. Sem binário, nada a conferir.'
+            exit 0
+          }
+          $real = $exe.VersionInfo.ProductVersion
+          Write-Host "tag=$esperada  binário=$real"
+          if ($real -notlike "$esperada*") {
+            Write-Host "::error::A tag diz $esperada e o binário diz $real. MinVer não pegou a tag — o checkout trouxe as tags?"
+            exit 1
+          }
+
+      - name: Arquivar specs entregues
+        shell: pwsh
+        run: |
+          # Dry-run de propósito: mover as specs exigiria empurrar um commit
+          # para a main, e a ruleset recusa push do bot do Actions. O passo
+          # relata o que deveria ser arquivado; o arquivamento acontece no PR
+          # seguinte, pela skill. Um passo que falha sempre é um passo que todo
+          # mundo aprende a ignorar.
+          node scripts/archive-specs.mjs --dry-run
+
+      - name: Criar o GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        shell: pwsh
+        run: |
+          gh release create "$env:TAG" artefatos/* --title "$env:TAG" --generate-notes

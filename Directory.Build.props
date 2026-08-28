@@ -33,4 +33,22 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <!--
+    MinVer deriva a versao das tags do git. A tag e a ENTRADA: 'git tag v0.1.0'
+    e o build ja sai 0.1.0, sem arquivo de versao para alguem esquecer de
+    atualizar e sem exigir disciplina de mensagem de commit (o repositorio usa
+    assunto em portugues, nao conventional commits).
+
+    Entre tags, a versao sai como '<proxima>-alpha.0.N', o que e util: um
+    binario que nao veio de uma tag diz isso no proprio numero.
+  -->
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.0</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>
