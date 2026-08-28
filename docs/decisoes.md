@@ -28,7 +28,7 @@ A seleção de rota no Windows ordena por (1) *longest prefix match*, (2) métri
 
 `ifIndex` e LUID são resolvidos a cada operação e nunca cacheados entre sessões.
 
-**Por quê:** medido no ambiente. `ifIndex` é volátil — um adaptador USB/tethering desaparece ao desconectar e volta com outro índice. MAC também não serve: dois adaptadores desta máquina têm o bit *locally administered* setado (`EE-04-FA-10-04-65`, `22-17-4D-04-7D-D6`), ou seja, randomizados pelo driver. `InterfaceGuid` persiste.
+**Por quê:** medido no ambiente. `ifIndex` é volátil — um adaptador USB/tethering desaparece ao desconectar e volta com outro índice. MAC também não serve: dois adaptadores desta máquina têm o bit *locally administered* setado (`EE-…` e `22-…`; o bit está no primeiro octeto, o resto do endereço não acrescenta nada ao argumento e sai daqui porque o repositório é público), ou seja, randomizados pelo driver. `InterfaceGuid` persiste.
 
 ---
 
