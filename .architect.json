@@ -22,10 +22,12 @@
   },
   "stagesApplied": [
     "I",
+    "A",
     "B"
   ],
   "stageVersions": {
     "I": "0.8.0",
+    "A": "0.8.0",
     "B": "0.8.0"
   },
   "stagesDeclined": [
