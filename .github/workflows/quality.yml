@@ -1,0 +1,79 @@
+# A régua de qualidade, em um lugar só.
+#
+# É chamada pelo pipeline de PR e pelo de release. As duas usam este mesmo
+# arquivo de propósito: duas cópias de "lint, testes, build" divergem, e quando
+# divergem a do release é sempre a mais fraca — que é exatamente o caminho que
+# chega no usuário.
+#
+# Roda em Windows porque não há alternativa: o produto é net8.0-windows com
+# P/Invoke para iphlpapi.dll. Num repositório público os minutos de runner
+# Windows são gratuitos; num privado eles contariam 2x.
+
+name: qualidade
+
+on:
+  workflow_call:
+
+jobs:
+  verificar:
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # trace-check e spec-freshness comparam contra a base do PR.
+          # Com o checkout raso padrão não existe base com que comparar.
+          fetch-depth: 0
+
+      - name: Instalar o SDK do global.json
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Um passo só, e é o mesmo arquivo que o dev roda na máquina dele.
+      # No momento em que o CI roda uma lista de passos diferente, "passa na
+      # minha máquina" vira uma frase verdadeira e inútil.
+      - name: verify
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/verify.ps1
+
+  higiene:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # O repositório é público. docs/baseline-ambiente.md tem o IP público de
+      # cada link desta máquina, MAC, DNS e a tabela de sockets. Ele está no
+      # .gitignore, mas .gitignore não impede um `git add -f`, e depois de um
+      # push o estrago não se desfaz com um commit de remoção.
+      - name: baseline não pode estar versionado
+        run: |
+          if git ls-files --error-unmatch docs/baseline-ambiente.md > /dev/null 2>&1; then
+            echo "::error file=docs/baseline-ambiente.md::Este arquivo é o estado desta máquina (IP público, MAC, DNS, sockets) e o repositório é público."
+            echo "Remova do índice com: git rm --cached docs/baseline-ambiente.md"
+            echo "Ele é regenerado por: pwsh -File scripts/capture-baseline.ps1 -IncludeProbes"
+            exit 1
+          fi
+          echo "baseline não versionado, ok."
+
+      # Todo script citado em docs/ precisa existir. O procedimento de reversão
+      # total de alteracoes-sistema.md apontava para um scripts/route-diff.ps1
+      # que não existia — um caminho de volta que não roda é pior que nenhum,
+      # porque alguém conta com ele.
+      - name: docs não podem citar script inexistente
+        run: |
+          faltando=0
+          for ref in $(grep -rhoE 'scripts/[A-Za-z0-9._/-]+\.(ps1|mjs)' docs/ .claude/ *.md 2>/dev/null | sort -u); do
+            if [ ! -f "$ref" ]; then
+              echo "::error::docs citam $ref, que não existe."
+              faltando=1
+            fi
+          done
+          if [ "$faltando" -ne 0 ]; then
+            echo "Crie o script, ou corrija a referência. Um procedimento que cita comando inexistente falha na hora em que alguém precisa dele."
+            exit 1
+          fi
+          echo "todas as referências a scripts resolvem."
