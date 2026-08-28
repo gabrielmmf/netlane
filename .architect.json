@@ -31,7 +31,8 @@
     "F",
     "H",
     "E",
-    "D"
+    "D",
+    "L"
   ],
   "stageVersions": {
     "I": "0.8.0",
@@ -43,12 +44,15 @@
     "F": "0.8.0",
     "H": "0.8.0",
     "E": "0.8.0",
-    "D": "0.8.0"
+    "D": "0.8.0",
+    "L": "0.8.0"
   },
   "stagesDeclined": [
     "G"
   ],
-  "manualSetupPending": [],
+  "manualSetupPending": [
+    "git config core.hooksPath .githooks (por clone)"
+  ],
   "ecosystem": {
     "kind": "dotnet",
     "packageManager": "dotnet",

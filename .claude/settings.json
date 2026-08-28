@@ -86,5 +86,61 @@
       "Read(./.env)",
       "Read(./.env.*)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [".claude/hooks/session-start.mjs"],
+            "statusMessage": "Lendo a situação"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/guard-bash.mjs"] },
+          { "type": "command", "command": "node", "args": [".claude/hooks/guard-pr.mjs"] }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/guard-edit.mjs"] }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/track-work.mjs"] }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/record-failure.mjs"] }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [".claude/hooks/stop-verify.mjs"],
+            "timeout": 60
+          }
+        ]
+      }
+    ]
   }
 }
