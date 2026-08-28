@@ -1,0 +1,20 @@
+<Project>
+
+  <!--
+    Central package management: a versao de cada pacote e declarada uma vez,
+    aqui, e os .csproj so citam o nome. Evita dois projetos do mesmo repo
+    resolverem versoes diferentes do mesmo pacote sem ninguem perceber.
+  -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="Testes">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+</Project>
