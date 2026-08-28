@@ -29,7 +29,13 @@ const segments = command.split(/(?:&&|\|\||;|\n)/).map((s) => s.trim());
 const rules = [
   {
     id: "force-push",
-    test: (c) => /^git\s+push\b/.test(c) && /\s(-f|--force|--force-with-lease)\b/.test(c),
+    // A flag NAO e a unica forma de forcar. Um refspec com '+' na frente
+    // (`git push origin +main`, `+HEAD:main`, `+refs/heads/a:refs/heads/b`) e
+    // exatamente a mesma operacao e passava batido -- encontrado testando esta
+    // guarda contra a propria operacao que ela deveria pegar.
+    test: (c) =>
+      /^git\s+push\b/.test(c) &&
+      (/\s(-f|--force|--force-with-lease)\b/.test(c) || /\s\+[^\s+][^\s]*(\s|$)/.test(c)),
     reason:
       "Force push blocked. It rewrites history other people and the CI have " +
       "already fetched. If a commit must be undone, use `git revert`.",
