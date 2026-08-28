@@ -28,3 +28,9 @@ desktop.ini
 
 # Snapshots de rota e estado local do harness: estado desta maquina.
 .netlane/
+
+# Estado por maquina do harness, nao forma do repositorio.
+# Versionar transforma o "verify ja passou" de um dev numa afirmacao sobre todos.
+.claude/.architect-state.json
+.claude/.architect-events.jsonl
+.claude/settings.local.json
