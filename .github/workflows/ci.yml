@@ -1,0 +1,24 @@
+# Portão de pull request.
+#
+# Chama a régua compartilhada. Nada de qualidade é definido aqui — se estivesse,
+# divergiria do release, e a versão que chega no usuário seria a menos checada.
+
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+
+# Um push novo torna a execução anterior irrelevante. Cancelar economiza runner
+# sem perder informação. (No release é o contrário: lá se enfileira, nunca se
+# cancela — deploy cancelado no meio é sistema meio implantado.)
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualidade:
+    uses: ./.github/workflows/quality.yml

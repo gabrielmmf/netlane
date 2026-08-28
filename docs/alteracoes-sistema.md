@@ -59,7 +59,7 @@ netlane flush
 Stop-Service NetLane
 
 # 2. Conferir que a tabela de rotas voltou ao baseline
-pwsh -File scripts/route-diff.ps1 -Against docs/baseline-ambiente.md
+pwsh -File scripts/route-diff.ps1 -Contra baseline
 
 # 3. Desfazer as alterações da tabela acima, de baixo para cima
 ```

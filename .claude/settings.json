@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comentario": [
+    "Permissoes calibradas por CONSEQUENCIA, nao por ferramenta.",
+    "  allow: inspecao e verificacao local. Nao muda nada fora do repositorio.",
+    "  ask:   toca a rede, a tabela de rotas ou um servico do Windows.",
+    "  deny:  contorna o fluxo de revisao, ou viola um artigo da constituicao.",
+    "",
+    "Padrao e' um casamento de forma. Os hooks em .claude/hooks/ veem o argumento",
+    "real, entao pegam o que o padrao deixa passar ('cd sub && git push -f',",
+    "'git push origin HEAD:main'). Os dois existem de proposito; nenhum substitui",
+    "o outro, e cada checagem de hook tem uma copia no CI, porque hook so protege",
+    "uma sessao do Claude Code e o repositorio precisa estar seguro em todas."
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet format:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet --list-sdks)",
+      "Bash(dotnet --list-runtimes)",
+      "Bash(pwsh -File scripts/verify.ps1:*)",
+      "Bash(pwsh -NoProfile -File scripts/verify.ps1:*)",
+      "Bash(node scripts/trace-check.mjs:*)",
+      "Bash(node scripts/spec-freshness.mjs:*)",
+      "Bash(node scripts/context-budget.mjs:*)",
+      "Bash(node scripts/constitution-check.mjs:*)",
+      "Bash(node scripts/harness-report.mjs:*)",
+      "Bash(node scripts/archive-specs.mjs:*)",
+      "Bash(node scripts/repeat-failures.mjs:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git fetch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(Get-NetAdapter:*)",
+      "Bash(Get-NetRoute:*)",
+      "Bash(Get-NetIPConfiguration:*)"
+    ],
+    "ask": [
+      "Bash(pwsh -File scripts/field-tests/:*)",
+      "Bash(pwsh -File scripts/capture-baseline.ps1:*)",
+      "Bash(pwsh -File scripts/route-diff.ps1:*)",
+      "Bash(git push:*)",
+      "Bash(sc.exe:*)",
+      "Bash(New-Service:*)",
+      "Bash(Start-Service:*)",
+      "Bash(Stop-Service:*)",
+      "Bash(Set-Service:*)",
+      "PowerShell(Stop-Service:*)",
+      "PowerShell(Start-Service:*)",
+      "PowerShell(New-Service:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin main:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(route:*)",
+      "Bash(route.exe:*)",
+      "Bash(netsh:*)",
+      "Bash(New-NetRoute:*)",
+      "Bash(Remove-NetRoute:*)",
+      "Bash(Set-NetIPInterface:*)",
+      "Bash(Set-NetAdapterBinding:*)",
+      "Bash(Disable-NetAdapterBinding:*)",
+      "Bash(Enable-NetAdapterBinding:*)",
+      "PowerShell(route:*)",
+      "PowerShell(netsh:*)",
+      "PowerShell(New-NetRoute:*)",
+      "PowerShell(Remove-NetRoute:*)",
+      "PowerShell(Set-NetAdapterBinding:*)",
+      "PowerShell(Disable-NetAdapterBinding:*)",
+      "PowerShell(Enable-NetAdapterBinding:*)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [".claude/hooks/session-start.mjs"],
+            "statusMessage": "Lendo a situação"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/guard-bash.mjs"] },
+          { "type": "command", "command": "node", "args": [".claude/hooks/guard-pr.mjs"] }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/guard-edit.mjs"] }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/track-work.mjs"] }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node", "args": [".claude/hooks/record-failure.mjs"] }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [".claude/hooks/stop-verify.mjs"],
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

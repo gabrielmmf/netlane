@@ -1,0 +1,45 @@
+# A régua de qualidade, em um lugar só.
+#
+# É chamada pelo pipeline de PR e pelo de release. As duas usam este mesmo
+# arquivo de propósito: duas cópias de "lint, testes, build" divergem, e quando
+# divergem a do release é sempre a mais fraca — que é exatamente o caminho que
+# chega no usuário.
+#
+# Roda em Windows porque não há alternativa: o produto é net8.0-windows com
+# P/Invoke para iphlpapi.dll. Num repositório público os minutos de runner
+# Windows são gratuitos; num privado eles contariam 2x.
+
+name: qualidade
+
+on:
+  workflow_call:
+
+jobs:
+  verificar:
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # trace-check e spec-freshness comparam contra a base do PR, e a
+          # higiene consulta o índice do git. Com o checkout raso padrão não
+          # existe base com que comparar.
+          fetch-depth: 0
+
+      - name: Instalar o SDK do global.json
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Um passo só, e é o mesmo arquivo que o dev roda na máquina dele.
+      # No momento em que o CI roda uma lista de passos diferente, "passa na
+      # minha máquina" vira uma frase verdadeira e inútil.
+      #
+      # verify.ps1 já inclui a higiene do repositório (baseline não versionado,
+      # nenhum doc citando script inexistente). Repetir aqui em bash criaria
+      # duas implementações da mesma regra, e a que divergisse seria a que
+      # ninguém roda.
+      - name: verify
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/verify.ps1

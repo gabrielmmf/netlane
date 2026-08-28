@@ -1,0 +1,99 @@
+{
+  "architectVersion": "0.8.0",
+  "lastRun": "2026-08-27",
+  "constitution": "docs/constituicao.md",
+  "productionBranch": "main",
+  "specs": {
+    "dir": "docs/specs",
+    "archive": "docs/specs/arquivo"
+  },
+  "decisions": {
+    "language": "pt-BR",
+    "branchingModel": "trunk-com-um-pr-por-fatia",
+    "remoteVisibility": "public",
+    "fieldTestIsolation": "snapshot-restore-no-host",
+    "versioning": "minver-tag-driven"
+  },
+  "customStages": {
+    "P": {
+      "name": "pre-publicacao",
+      "date": "2026-08-27",
+      "what": "docs/baseline-ambiente.md removido da historia (commit raiz reescrito) e ignorado: continha IP publico, MAC, DNS e tabela de sockets desta maquina, e o repo ia virar publico."
+    }
+  },
+  "stagesApplied": [
+    "I",
+    "A",
+    "B",
+    "J",
+    "C",
+    "K",
+    "F",
+    "H",
+    "E",
+    "D",
+    "L"
+  ],
+  "stageVersions": {
+    "I": "0.8.0",
+    "A": "0.8.0",
+    "B": "0.8.0",
+    "J": "0.8.0",
+    "C": "0.8.0",
+    "K": "0.8.0",
+    "F": "0.8.0",
+    "H": "0.8.0",
+    "E": "0.8.0",
+    "D": "0.8.0",
+    "L": "0.8.0"
+  },
+  "stagesDeclined": [
+    "G"
+  ],
+  "manualSetupPending": [
+    "git config core.hooksPath .githooks (por clone)"
+  ],
+  "ecosystem": {
+    "kind": "dotnet",
+    "packageManager": "dotnet",
+    "sdk": "10.0.201",
+    "targetFramework": "net8.0-windows10.0.19041.0"
+  },
+  "commands": {
+    "install": "dotnet restore NetLane.sln",
+    "lint": "dotnet format NetLane.sln --verify-no-changes",
+    "test": "dotnet test NetLane.sln -c Release",
+    "build": "dotnet build NetLane.sln -c Release",
+    "verify": "pwsh -File scripts/verify.ps1"
+  },
+  "tests": {
+    "globs": [
+      "tests/**/*.cs"
+    ]
+  },
+  "context": {
+    "budgetTokens": 9000
+  },
+  "tiers": {
+    "2": {
+      "paths": [
+        "src/**"
+      ],
+      "minFilesChanged": 3
+    },
+    "3": {
+      "paths": [
+        "src/NetLane.Windows/**",
+        "src/NetLane.Service/**",
+        "scripts/field-tests/**",
+        ".github/workflows/**",
+        "docs/constituicao.md",
+        "scripts/verify.ps1"
+      ]
+    }
+  },
+  "learning": {
+    "adrFile": "docs/decisoes.md",
+    "fieldTests": "scripts/field-tests"
+  }
+}

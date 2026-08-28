@@ -1,0 +1,54 @@
+<Project>
+
+  <!--
+    Propriedades comuns a todos os projetos. O que muda o jeito de escrever
+    codigo fica aqui; o que e especifico de um projeto fica no .csproj dele.
+  -->
+
+  <PropertyGroup>
+    <!--
+      O alvo do produto. Nao e aplicado automaticamente: cada projeto opta por
+      ele com <TargetFramework>$(NetLaneTargetFramework)</TargetFramework>.
+      Fixar o TFM aqui para todo mundo obrigaria os testes de arquitetura (que
+      so leem arquivos e nao tocam em Windows) a arrastar a stack WPF inteira.
+    -->
+    <NetLaneTargetFramework>net8.0-windows10.0.19041.0</NetLaneTargetFramework>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!--
+      Aviso vira erro. Num projeto com P/Invoke, os avisos que mais importam
+      (CA1401, SYSLIB1054, marshalling implicito) sao exatamente os que se
+      ignora quando sao so avisos.
+    -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!--
+    MinVer deriva a versao das tags do git. A tag e a ENTRADA: 'git tag v0.1.0'
+    e o build ja sai 0.1.0, sem arquivo de versao para alguem esquecer de
+    atualizar e sem exigir disciplina de mensagem de commit (o repositorio usa
+    assunto em portugues, nao conventional commits).
+
+    Entre tags, a versao sai como '<proxima>-alpha.0.N', o que e util: um
+    binario que nao veio de uma tag diz isso no proprio numero.
+  -->
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.0</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
