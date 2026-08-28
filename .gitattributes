@@ -1,0 +1,14 @@
+# Normaliza fim de linha na entrada. Sem isto, com core.autocrlf=true na maquina
+# do dev e LF no runner do CI, um arquivo aparece inteiro como alterado num diff
+# que nao mudou nada -- e a revisao de PR fica inutil.
+* text=auto eol=lf
+
+# Arquivos que so o Windows le e que quebram com LF.
+*.ps1   text eol=crlf
+*.psm1  text eol=crlf
+*.cmd   text eol=crlf
+*.bat   text eol=crlf
+*.sln   text eol=crlf
+
+*.png   binary
+*.ico   binary
