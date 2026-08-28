@@ -1,0 +1,28 @@
+{
+  "architectVersion": "0.8.0",
+  "lastRun": "2026-08-27",
+
+  "constitution": "docs/constituicao.md",
+  "productionBranch": "main",
+  "specs": { "dir": "docs/specs", "archive": "docs/specs/arquivo" },
+
+  "decisions": {
+    "language": "pt-BR",
+    "branchingModel": "trunk-com-um-pr-por-fatia",
+    "remoteVisibility": "public",
+    "fieldTestIsolation": "snapshot-restore-no-host"
+  },
+
+  "customStages": {
+    "P": {
+      "name": "pre-publicacao",
+      "date": "2026-08-27",
+      "what": "docs/baseline-ambiente.md removido da historia (commit raiz reescrito) e ignorado: continha IP publico, MAC, DNS e tabela de sockets desta maquina, e o repo ia virar publico."
+    }
+  },
+
+  "stagesApplied": ["I"],
+  "stageVersions": { "I": "0.8.0" },
+  "stagesDeclined": ["G"],
+  "manualSetupPending": []
+}
