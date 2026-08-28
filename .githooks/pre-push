@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Recusa push direto para a main.
+#
+# A ruleset do GitHub já recusa isso do lado do servidor. Este hook existe para
+# recusar 200 ms antes, sem a viagem de ida e volta, e para que a regra continue
+# existindo se alguém clonar num contexto onde a ruleset não se aplica.
+#
+# Instalar (uma vez, por clone):
+#   git config core.hooksPath .githooks
+#
+# Pular deliberadamente, quando houver motivo:
+#   git push --no-verify
+
+BRANCH_PROTEGIDA="main"
+
+while read -r _local_ref local_sha remote_ref _remote_sha; do
+    case "$remote_ref" in
+        "refs/heads/$BRANCH_PROTEGIDA")
+            # Deleção da main também não.
+            if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+                echo "pre-push: recusado — apagar '$BRANCH_PROTEGIDA'." >&2
+                exit 1
+            fi
+
+            echo "pre-push: recusado — push direto para '$BRANCH_PROTEGIDA'." >&2
+            echo "" >&2
+            echo "  O fluxo é: branch por fatia, PR, o CI roda, e VOCÊ faz o merge." >&2
+            echo "  Sem PR não existe lugar onde os gates rodem." >&2
+            echo "" >&2
+            echo "    git checkout -b feat/<letra-da-fatia>-<assunto>" >&2
+            echo "    git push -u origin HEAD" >&2
+            echo "    gh pr create --base main" >&2
+            echo "" >&2
+            echo "  Se este push é mesmo deliberado: git push --no-verify" >&2
+            exit 1
+            ;;
+    esac
+done
+
+exit 0
