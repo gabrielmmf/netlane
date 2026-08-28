@@ -94,10 +94,8 @@ try {
         Write-Host '    a copia no CI e o que torna a regra real.' -ForegroundColor DarkGray
     }
 
-    if (Test-Path 'scripts/referencias-docs.ps1') {
-        Invoke-Passo 'referencias dos docs' { pwsh -NoProfile -File scripts/referencias-docs.ps1 } `
-            'Um procedimento de reversao que cita script inexistente e pior que nenhum.'
-    }
+    Invoke-Passo 'higiene do repositorio' { pwsh -NoProfile -File scripts/higiene-repo.ps1 } `
+        'Baseline nao versionado num repo publico, e nenhum doc citando script que nao existe.'
 }
 finally {
     Pop-Location

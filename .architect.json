@@ -26,7 +26,9 @@
     "B",
     "J",
     "C",
-    "K"
+    "K",
+    "F",
+    "H"
   ],
   "stageVersions": {
     "I": "0.8.0",
@@ -34,7 +36,9 @@
     "B": "0.8.0",
     "J": "0.8.0",
     "C": "0.8.0",
-    "K": "0.8.0"
+    "K": "0.8.0",
+    "F": "0.8.0",
+    "H": "0.8.0"
   },
   "stagesDeclined": [
     "G"
@@ -78,5 +82,9 @@
         "scripts/verify.ps1"
       ]
     }
+  },
+  "learning": {
+    "adrFile": "docs/decisoes.md",
+    "fieldTests": "scripts/field-tests"
   }
 }

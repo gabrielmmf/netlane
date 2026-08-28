@@ -25,3 +25,6 @@ docs/baseline-ambiente.md
 # Sistema
 Thumbs.db
 desktop.ini
+
+# Snapshots de rota e estado local do harness: estado desta maquina.
+.netlane/
