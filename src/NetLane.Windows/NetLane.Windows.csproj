@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    A fronteira com o SO. Implementa os contratos de Abstractions.
+    Ninguem depende deste projeto em tempo de compilacao alem da composition root, e
+    isso que mantem a decisao de rota testavel sem Windows.
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(NetLaneTargetFramework)</TargetFramework>
+    <Platforms>x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetLane.Abstractions\NetLane.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

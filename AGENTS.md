@@ -117,8 +117,11 @@ A regra de dependência é `Abstractions ← Core ← Módulos`. `Windows` imple
   e companhia reprovam o build. Ban de anticheat não tem reversão.
 - **Nenhum `netsh` nem `route.exe`** — alteração de sistema passa pela API e pelo registro
   do Artigo 2.
-- **Língua**: português no código, nos identificadores de domínio, nos comentários, nas
-  mensagens de commit e no texto de interface. Nomes de API do Windows ficam como são.
+- **Língua**: **identificadores e tipos em inglês**, seguindo os contratos já definidos em
+  `plano-tecnico.md` §3 (`ILink`, `LinkState`, `RouteSpec`). **Comentários, mensagens de
+  commit, documentação e texto de interface em português.** A regra existe assim porque a
+  convenção de código do projeto já estava escrita no plano antes deste harness — não faz
+  sentido o harness impor outra por cima.
 - **Mensagem de commit**: linha de assunto em português, imperativo ou substantivo, sem
   prefixo de conventional commit. A versão vem da tag, não da mensagem.
 

@@ -30,6 +30,10 @@ A seleção de rota no Windows ordena por (1) *longest prefix match*, (2) métri
 
 **Por quê:** medido no ambiente. `ifIndex` é volátil — um adaptador USB/tethering desaparece ao desconectar e volta com outro índice. MAC também não serve: dois adaptadores desta máquina têm o bit *locally administered* setado (`EE-…` e `22-…`; o bit está no primeiro octeto, o resto do endereço não acrescenta nada ao argumento e sai daqui porque o repositório é público), ou seja, randomizados pelo driver. `InterfaceGuid` persiste.
 
+**Confirmado em campo, 2026-08-28.** Entre a captura do baseline (2026-08-24) e a primeira execução do código, sem nada ter sido reinstalado, o `ifIndex` do Wi-Fi foi de **12 para 13** e o do Tailscale de **9 para 36**. O `InterfaceGuid` de ambos não se moveu. A decisão deixa de ser argumento e passa a ser medição.
+
+**Achado adicional:** `NetworkInterface.Id` da BCL **é** o `InterfaceGuid` no Windows — então a descoberta de links não precisa de P/Invoke nenhum. O interop fica reservado para escrever na tabela de rotas.
+
 ---
 
 ## D-004 · IP Helper API, nunca `route.exe`
