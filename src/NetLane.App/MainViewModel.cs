@@ -29,7 +29,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         this.linkRegistry = linkRegistry;
         this.processRegistry = processRegistry;
         this.ruleStore = ruleStore;
-        this.rules = [.. ruleStore.Load()];
+        rules = [.. ruleStore.Load()];
 
         Refresh();
     }
