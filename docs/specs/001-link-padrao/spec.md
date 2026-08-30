@@ -15,6 +15,12 @@ owns:
 **Tier 3** — toca `src/NetLane.Windows/Routing/**` e `Interop/**`. O plano precisa de
 aprovação humana explícita antes de qualquer implementação.
 
+> **`status: draft` aqui não significa "não acordada".** As cinco perguntas foram feitas e
+> respondidas (ver *Decisões*); o conteúdo está fechado. Ela fica em `draft` porque
+> `ready` faz o `trace-check` cobrar um teste por critério **imediatamente**, e a
+> implementação está travada em F1 e F5. Passa para `in-progress` no mesmo PR em que os
+> primeiros testes entrarem. Ver `docs/specs/README.md`.
+
 ## O problema
 
 Hoje o NetLane só sabe fazer **exceção**. A regra casa um executável e manda ele por um
@@ -70,11 +76,10 @@ Por que não as alternativas:
 
 As rotas `/1` são voláteis (`ActiveStore`), então um reboot as elimina — Artigo 3 preservado.
 
-**Consequência que inverte o modelo:** com um padrão do NetLane no lugar, uma regra por
-processo que aponte para *outro* link continua sendo um `/32`, que vence o `/1` por prefixo
-mais longo. Mas uma regra que queira mandar um processo de volta ao **caminho original do
-Windows** também precisa de `/32`s — e só sabemos os destinos dele em runtime, pelo socket.
-Isso é o `[NEEDS CLARIFICATION]` nº 2.
+**Como as exceções continuam funcionando:** com um padrão do NetLane no lugar, uma regra
+por processo aponta para outro link com um `/32`, que vence o `/1` por prefixo mais longo.
+Mandar um processo de volta ao caminho original do Windows **não** é oferecido — ver
+decisão 2 — e é o que impede esta spec de arrastar a tabela de sockets junto.
 
 ## Critérios de aceitação
 
@@ -117,8 +122,8 @@ Artigo 3.
   P-001 continua sendo uma decisão de alteração de sistema em aberto, com o próprio
   processo.
 - **Medir consumo por link.** É o módulo Pulse.
-- **O AC-004 que falta.** Suspeito que seja isto, mas confirmar é decisão do usuário, não
-  dedução minha — ver pergunta 5.
+- **Preencher o AC-004 que falta.** Ver decisão 5: fica um buraco declarado.
+- **Padrão por processo do sistema.** Decisão 1 fechou: o padrão pega a máquina inteira.
 
 ## Dependências
 
@@ -133,28 +138,32 @@ Artigo 3.
 
 Nenhuma linha de implementação deve ser escrita antes de F1 e F5 responderem.
 
-## Perguntas em aberto
+## Decisões
 
-- [NEEDS CLARIFICATION: 1 — o link padrão vale também para o tráfego do próprio Windows
-  (Update, telemetria, NTP), ou só para processos de usuário? As rotas `/1` não
-  distinguem: elas pegam a máquina inteira. Se a resposta for "só processos de usuário",
-  o mecanismo `/1` não serve e a spec muda de mecanismo.]
+Perguntadas e respondidas em 2026-08-30, não inferidas.
 
-- [NEEDS CLARIFICATION: 2 — como uma regra manda um processo de volta ao caminho original
-  do Windows, uma vez que o padrão do NetLane está no lugar? Só sabemos os destinos dele
-  em runtime, pela tabela de sockets. Isso torna a tabela de sockets uma dependência do
-  padrão, e não uma fatia independente.]
+**1 · O padrão vale para a máquina inteira.** Windows Update, NTP e telemetria também
+saem pelo link escolhido. É o que "padrão" significa, e é como uma VPN se comporta. O
+mecanismo `/1` fica como proposto: duas rotas por família e mais nada.
 
-- [NEEDS CLARIFICATION: 3 — o que acontece quando uma VPN sobe? O Tailscale desta máquina
-  cria rotas próprias; um `/1` do NetLane venceria o `/0` dela e poderia tirar o tráfego
-  de dentro do túnel. Isso é aceitável, é um erro a evitar, ou o NetLane deve reconhecer
-  interfaces de VPN e sair da frente?]
+**2 · Não existe "voltar ao caminho do Windows" como opção de regra.** Toda regra nomeia
+um link explicitamente. Com um padrão declarado, o caminho do Windows deixou de ser uma
+escolha significativa. **Consequência boa e deliberada:** a tabela de sockets continua
+sendo uma fatia independente, e não vira dependência dura desta.
 
-- [NEEDS CLARIFICATION: 4 — o link padrão é lembrado entre sessões? Se sim, o NetLane
-  passa a alterar a tabela de rotas assim que o serviço sobe, antes de o usuário abrir
-  nada. É um comportamento diferente em natureza do que existe hoje, e merece ser
-  escolhido, não herdado.]
+**3 · Convive com VPN, e avisa em vez de disputar em silêncio.** Split-tunnel usa prefixos
+mais específicos que `/1` — o Tailscale desta máquina roteia `100.64.0.0/10`, que vence um
+`/1` por *longest prefix match*, então não há nada a fazer no caso normal. Se uma VPN subir
+como *exit node* (anunciando `/0` ou `/1`), o NetLane detecta o empate e avisa. Tirar
+tráfego de dentro de um túnel sem o usuário perceber é literalmente o "errado e silencioso"
+que a constituição chama de pior resultado.
 
-- [NEEDS CLARIFICATION: 5 — isto é o critério de aceitação 4 que falta em
-  `000-criterios-de-aceitacao`? Se for, os AC-009..AC-014 substituem o AC-004 e ele é
-  marcado como resolvido em vez de continuar um buraco.]
+**4 · O padrão é lembrado e reaplicado quando o serviço sobe.** Isso muda a natureza do
+produto: o NetLane passa a criar rotas no boot, antes de o usuário abrir qualquer coisa. É
+o AC-013 que impede isso de ser invisível — o ícone da bandeja tem que declarar que o
+Windows não está mais decidindo. As rotas continuam voláteis (Artigo 3).
+
+**5 · O AC-004 continua um buraco declarado, e não é preenchido por dedução.** Os
+AC-009…AC-014 são critérios **novos**; afirmar que eles são o que o critério 4 dizia seria
+inventar história que ninguém pode conferir. Ele fica aberto em
+`000-criterios-de-aceitacao` até o usuário lembrar ou decidir descartá-lo.
