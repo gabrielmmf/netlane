@@ -1,0 +1,166 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Paleta e tipografia de docs/design.md.
+
+        A cor aqui NAO e marca: e o identificador do link. Por isso nao ha um
+        accent global - ele competiria com o unico significado que a cor tem
+        nesta interface. E por isso vermelho ficou FORA da rampa: se vermelho
+        pudesse ser a cor de um link, vermelho na tela ficaria ambiguo.
+    -->
+
+    <!-- Superficies -->
+    <SolidColorBrush x:Key="Fundo"        Color="#12141A" />
+    <SolidColorBrush x:Key="FundoElevado" Color="#191C24" />
+    <SolidColorBrush x:Key="Borda"        Color="#262B36" />
+
+    <!-- Texto -->
+    <SolidColorBrush x:Key="Tinta"        Color="#E6E9F0" />
+    <SolidColorBrush x:Key="TintaFraca"   Color="#8B93A7" />
+    <SolidColorBrush x:Key="Fumo"         Color="#4A5162" />
+
+    <!-- Rampa de raia: identidade de link. Seis, e nenhuma delas vermelha. -->
+    <SolidColorBrush x:Key="raia-1" Color="#4FD1C5" />
+    <SolidColorBrush x:Key="raia-2" Color="#F6AD55" />
+    <SolidColorBrush x:Key="raia-3" Color="#9F7AEA" />
+    <SolidColorBrush x:Key="raia-4" Color="#68D391" />
+    <SolidColorBrush x:Key="raia-5" Color="#4299E1" />
+    <SolidColorBrush x:Key="raia-6" Color="#ED8936" />
+
+    <!-- Vermelho existe para uma coisa so: problema. -->
+    <SolidColorBrush x:Key="Alarme" Color="#FC8181" />
+
+    <!--
+        Consolas como face de dados (D-009). Cascadia Mono NAO esta instalada
+        nesta maquina e nao vem em Windows limpo; uma face de dados que as vezes
+        nao existe e uma face que as vezes vira serifada num campo de IP.
+    -->
+    <FontFamily x:Key="FaceDeDados">Consolas</FontFamily>
+    <FontFamily x:Key="FaceDeTexto">Segoe UI Variable Text, Segoe UI</FontFamily>
+
+    <Style x:Key="Titulo" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FaceDeTexto}" />
+        <Setter Property="FontSize"   Value="20" />
+        <Setter Property="Foreground" Value="{StaticResource Tinta}" />
+    </Style>
+
+    <Style x:Key="Rotulo" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FaceDeTexto}" />
+        <Setter Property="FontSize"   Value="11" />
+        <Setter Property="Foreground" Value="{StaticResource TintaFraca}" />
+    </Style>
+
+    <Style x:Key="Dado" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FaceDeDados}" />
+        <Setter Property="FontSize"   Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource Tinta}" />
+    </Style>
+
+    <!--
+        ComboBox proprio. O template padrao do WPF (Aero2) desenha um controle
+        claro, com gradiente, que ignora Background e Foreground: num tema
+        escuro ele aparece como um retangulo branco no meio da tabela. Nao e
+        preferencia - e o unico jeito de o controle obedecer a paleta.
+    -->
+    <Style x:Key="SeletorDeLink" TargetType="ComboBox">
+        <Setter Property="Foreground" Value="{StaticResource Tinta}" />
+        <Setter Property="Background" Value="{StaticResource FundoElevado}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Borda}" />
+        <Setter Property="FontFamily" Value="{StaticResource FaceDeTexto}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <ToggleButton x:Name="Alternador" Focusable="False" ClickMode="Press"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay,
+                                                  RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border x:Name="Caixa"
+                                            Background="{StaticResource FundoElevado}"
+                                            BorderBrush="{StaticResource Borda}"
+                                            BorderThickness="1" Padding="8,4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <ContentPresenter Grid.Column="0"
+                                                              Content="{Binding SelectionBoxItem,
+                                                                        RelativeSource={RelativeSource AncestorType=ComboBox}}"
+                                                              VerticalAlignment="Center"
+                                                              HorizontalAlignment="Left" />
+                                            <Path Grid.Column="1" Data="M0,0 L8,0 L4,5 Z"
+                                                  Fill="{StaticResource TintaFraca}"
+                                                  VerticalAlignment="Center" Margin="8,0,0,0" />
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Caixa" Property="BorderBrush"
+                                                    Value="{StaticResource TintaFraca}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <Popup IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom"
+                               AllowsTransparency="True" Focusable="False" PopupAnimation="None">
+                            <Border Background="{StaticResource FundoElevado}"
+                                    BorderBrush="{StaticResource Borda}" BorderThickness="1"
+                                    MinWidth="{TemplateBinding ActualWidth}">
+                                <ItemsPresenter />
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ItemDeSeletor" TargetType="ComboBoxItem">
+        <Setter Property="Foreground" Value="{StaticResource Tinta}" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Fundo" Background="Transparent" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Fundo" Property="Background" Value="#242938" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        Foco de teclado visivel em todo controle interativo (design.md secao 8).
+        Implementado, nunca anunciado. Um contorno de 2px, deslocado 2px.
+    -->
+    <Style x:Key="FocoVisivel" TargetType="Control">
+        <Setter Property="FocusVisualStyle">
+            <Setter.Value>
+                <Style>
+                    <Setter Property="Control.Template">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <Rectangle Margin="-2"
+                                           Stroke="{StaticResource raia-1}"
+                                           StrokeThickness="2"
+                                           SnapsToDevicePixels="True" />
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

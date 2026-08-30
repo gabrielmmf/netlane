@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Contratos puros. net8.0 e nao $(NetLaneTargetFramework) de proposito:
+    este projeto nao pode nem conseguir referenciar Windows. E o que garante que
+    a logica de decisao rode num runner de CI sem placa de rede.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+</Project>

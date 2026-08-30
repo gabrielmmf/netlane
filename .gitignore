@@ -34,3 +34,7 @@ desktop.ini
 .claude/.architect-state.json
 .claude/.architect-events.jsonl
 .claude/settings.local.json
+
+# Saida de publicacao local (o release do CI usa o mesmo nome).
+artefatos/
+captura-*.png

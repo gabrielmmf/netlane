@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Logica de decisao. Sem I/O de sistema, sem Windows: so regras e dados. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetLane.Abstractions\NetLane.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

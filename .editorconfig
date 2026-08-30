@@ -1,0 +1,43 @@
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+# end_of_line = lf existe aqui por um motivo medido, nao por gosto.
+#
+# .gitattributes forca LF no checkout. Sem esta linha, `dotnet format` no
+# Windows usa Environment.NewLine (CRLF) como referencia -- entao na maquina do
+# dev, com core.autocrlf=true, o arquivo esta em CRLF e o format aprova; no
+# runner, que recebe LF, o MESMO comando reprova o MESMO arquivo.
+#
+# Custou uma rodada de CI vermelha num PR cujo verify local estava verde. Quando
+# a regua discorda de si mesma entre duas maquinas, ela deixa de ser regua.
+end_of_line = lf
+
+[*.{cs,csproj,props,targets,xaml}]
+indent_size = 4
+
+[*.{json,yml,yaml,mjs,js}]
+indent_size = 2
+
+# Scripts que so o Windows le ficam em CRLF, como manda o .gitattributes.
+[*.{ps1,psm1,cmd,bat}]
+end_of_line = crlf
+indent_size = 4
+
+[*.md]
+# Duas quebras no fim da linha sao sintaxe em markdown, nao sujeira.
+trim_trailing_whitespace = false
+
+[*.cs]
+# Convencoes de C# que o build ja cobra (EnforceCodeStyleInBuild).
+csharp_new_line_before_open_brace = all
+csharp_prefer_braces = true:warning
+dotnet_sort_system_directives_first = true
+csharp_using_directive_placement = outside_namespace:warning
+csharp_style_namespace_declarations = file_scoped:warning
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
