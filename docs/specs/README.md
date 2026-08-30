@@ -52,11 +52,21 @@ A palavra-chave em `status:` é em inglês porque os gates casam com ela.
 
 | `status:` | Significa | Os gates olham? |
 | --- | --- | --- |
-| `draft` | rascunho, ainda não acordado | não |
-| `ready` | acordado, ainda não implementado | sim |
+| `draft` | escrita. Pode já estar **acordada** — só não começou | não |
+| `ready` | acordada **e a implementação começou neste PR** | sim |
 | `in-progress` | em implementação | sim |
 | `shipped` | entregue | sim |
 | arquivada em `arquivo/` | histórica | não |
+
+**`ready` não é "acordada e esperando".** No momento em que uma spec entra em `ready`, o
+`trace-check` passa a cobrar um teste que cite cada id dela — e reprova o `verify`, e
+reprova o CI. Uma spec acordada mas travada (esperando um teste de campo, uma decisão, uma
+dependência) fica em `draft`, com o motivo escrito no corpo dela.
+
+Isso foi descoberto do jeito certo: a spec 001 foi para `ready` e o gate reprovou seis
+critérios sem teste, com a implementação bloqueada por F1. A alternativa — deixar o CI
+vermelho enquanto se espera — é o pior estado possível, porque ensina todo mundo a ignorar
+o vermelho.
 
 ## Arquivar ao entregar
 

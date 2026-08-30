@@ -23,6 +23,22 @@ if (!command.trim()) allow();
 
 const branch = config()?.productionBranch ?? "main";
 
+/**
+ * O nome esta em posicao de COMANDO (inicio do segmento, ou logo apos um pipe),
+ * e nao apenas em algum lugar da linha.
+ *
+ * `grep -n "New-NetRoute" src/` procura pela string; `New-NetRoute -Destination...`
+ * cria uma rota. Sao coisas diferentes e a guarda precisa distinguir, senao ela
+ * bloqueia leitura de codigo e alguem a desinstala.
+ */
+const emPosicaoDeComando = (segmento, nomes) =>
+  new RegExp(String.raw`(^|\|)\s*(sudo\s+)?(${nomes})\b`, "i").test(segmento);
+
+/** Comandos que so LEEM texto. O que aparece neles e argumento, nunca invocacao. */
+const ehBusca = (segmento) =>
+  /^\s*(grep|rg|ag|ack|git\s+grep|findstr|Select-String|sls|cat|less|head|tail|Get-Content|awk|sed)\b/i
+    .test(segmento);
+
 /** Split on shell separators so `cd x && git push` is inspected, not skipped. */
 const segments = command.split(/(?:&&|\|\||;|\n)/).map((s) => s.trim());
 
@@ -88,6 +104,12 @@ const rules = [
 
   // ------------------------------------------------------------ NetLane
   //
+  // As regras abaixo usam `emPosicaoDeComando` em vez de procurar o nome em
+  // qualquer lugar da linha. Custou um bloqueio de um `grep -n "New-NetRoute"`
+  // que so estava PROCURANDO pela string no codigo: a guarda leu o argumento de
+  // busca como se fosse a invocacao. Falso positivo e como guarda vira guarda
+  // desinstalada, e ai as verdadeiras vao junto.
+  //
   // As tres regras abaixo sao os artigos 1, 2 e 3 da constituicao na forma em
   // que um agente os encontra antes de errar: um comando solto no terminal.
   //
@@ -98,8 +120,11 @@ const rules = [
   {
     id: "rota-persistente",
     test: (c) =>
-      /\broute(\.exe)?\s+(add|change)\b/i.test(c) && /\s-p\b/i.test(c) ||
-      /\bNew-NetRoute\b/i.test(c) && /-PolicyStore\s+PersistentStore/i.test(c),
+      !ehBusca(c) &&
+      ((emPosicaoDeComando(c, "route|route\\.exe") &&
+        /\s(add|change)\b/i.test(c) && /\s-p\b/i.test(c)) ||
+       (emPosicaoDeComando(c, "New-NetRoute") &&
+        /-PolicyStore\s+PersistentStore/i.test(c))),
     reason:
       "Rota persistente bloqueada (Artigo 3 da constituicao). O reboot e a " +
       "ultima rede de seguranca do usuario: se uma rota do NetLane sobreviver " +
@@ -108,8 +133,9 @@ const rules = [
   {
     id: "rota-ad-hoc",
     test: (c) =>
-      /\b(New-NetRoute|Remove-NetRoute|Set-NetRoute)\b/i.test(c) ||
-      /\broute(\.exe)?\s+(add|delete|change)\b/i.test(c),
+      !ehBusca(c) &&
+      (emPosicaoDeComando(c, "New-NetRoute|Remove-NetRoute|Set-NetRoute") ||
+       (emPosicaoDeComando(c, "route|route\\.exe") && /\s(add|delete|change)\b/i.test(c))),
     reason:
       "Mexer na tabela de rotas por comando solto esta bloqueado. Nao e o " +
       "comando que e proibido -- e faze-lo sem contencao. Um erro no meio " +
@@ -123,9 +149,11 @@ const rules = [
   {
     id: "alteracao-de-rede-permanente",
     test: (c) =>
-      /\bnetsh\b/i.test(c) ||
-      /\b(Set|Enable|Disable)-NetAdapterBinding\b/i.test(c) ||
-      /\bSet-NetIPInterface\b/i.test(c),
+      !ehBusca(c) &&
+      emPosicaoDeComando(
+        c,
+        "netsh|netsh\\.exe|Set-NetAdapterBinding|Enable-NetAdapterBinding|" +
+        "Disable-NetAdapterBinding|Set-NetIPInterface"),
     reason:
       "Alteracao permanente de configuracao de rede bloqueada (Artigo 2). " +
       "Toda mudanca de sistema e ESCRITA antes de ser aplicada, com o comando " +
@@ -137,7 +165,9 @@ const rules = [
   {
     id: "anticheat",
     test: (c) =>
-      /\b(Stop-Service|Set-Service|sc(\.exe)?\s+(stop|delete|config)|taskkill|Stop-Process)\b/i.test(c) &&
+      !ehBusca(c) &&
+      emPosicaoDeComando(
+        c, "Stop-Service|Set-Service|sc|sc\\.exe|taskkill|Stop-Process") &&
       /\b(vgk|vgc|Vanguard|EasyAntiCheat|EasyAntiCheat_EOS|BEService|BattlEye|EAAntiCheat|EABackgroundService)\b/i.test(c),
     reason:
       "Bloqueado: isto mexe num anticheat. Nao ha versao aceitavel disso, nem " +
